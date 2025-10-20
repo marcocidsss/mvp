@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Gijón Club · Comprar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>body{background:#fff8f0;padding:20px}.brand{color:#7b2cbf}</style>
+</head>
+<body>
+<div class="container">
+  <div class="d-flex justify-content-between mb-4">
+    <h1 class="brand">Gijón Club</h1>
+    <a class="btn btn-outline-primary" href="/admin">Admin</a>
+  </div>
+  <div class="card p-4 mb-4">
+    <h4>Registro / Acceso</h4>
+    <form id="reg" class="row g-2">
+      <div class="col-md-4"><input id="email" class="form-control" placeholder="email" value="user@gijonclub.local"/></div>
+      <div class="col-md-3"><input id="name" class="form-control" placeholder="nombre" value="User Demo"/></div>
+      <div class="col-md-3"><input id="password" class="form-control" placeholder="password" value="UserPass123!"/></div>
+      <div class="col-md-2"><button class="btn btn-primary w-100">Entrar / Registrar</button></div>
+    </form>
+  </div>
+
+  <div id="buy" style="display:none" class="card p-4">
+    <h4>Comprar entrada</h4>
+    <div id="event" class="mb-3"></div>
+    <div class="row g-2">
+      <div class="col-md-4">
+        <select id="zone" class="form-select"><option value="pista">Pista</option><option value="vip">VIP</option></select>
+      </div>
+      <div class="col-md-2"><button id="buybtn" class="btn btn-success w-100">Comprar</button></div>
+    </div>
+    <hr/>
+    <h5>Mis entradas</h5>
+    <pre id="mytickets"></pre>
+  </div>
+</div>
+<script>
+const apiBase='/api';
+document.getElementById('reg').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email=document.getElementById('email').value;
+  const name=document.getElementById('name').value;
+  const password=document.getElementById('password').value;
+  await fetch(apiBase+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name,password})});
+  const res = await fetch(apiBase+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+  const j = await res.json();
+  if(j.status==='ok'){ localStorage.setItem('token', j.token); document.getElementById('buy').style.display='block'; loadEvent(); loadTickets(); }
+  else alert('login failed');
+});
+
+async function loadEvent(){
+  const res = await fetch(apiBase+'/events'); const j = await res.json();
+  if(j.events && j.events[0]) document.getElementById('event').textContent = JSON.stringify(j.events[0], null, 2);
+}
+
+document.getElementById('buybtn').addEventListener('click', async ()=>{
+  const token = localStorage.getItem('token');
+  const zone = document.getElementById('zone').value;
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const evRes = await fetch(apiBase+'/events'); const evJson = await evRes.json(); const ev = evJson.events[0];
+  const res2 = await fetch(apiBase+'/buy',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({event_id:ev.id, zone, buyer_name:name, buyer_email:email})});
+  const j = await res2.json();
+  alert(JSON.stringify(j));
+  loadTickets();
+});
+
+async function loadTickets(){
+  const token = localStorage.getItem('token');
+  const res = await fetch(apiBase+'/mytickets',{method:'GET',headers:{'Authorization':'Bearer '+token}});
+  const j = await res.json();
+  document.getElementById('mytickets').textContent = JSON.stringify(j, null, 2);
+}
+</script>
+</body>
+</html>

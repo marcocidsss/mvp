@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Scanner · Gijón Club</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container p-4">
+  <h3>Scanner</h3>
+  <div class="card p-3 mb-3">
+    <form id="login" class="row g-2">
+      <div class="col-md-4"><input id="email" class="form-control" value="scanner@gijonclub.local"/></div>
+      <div class="col-md-4"><input id="password" class="form-control" value="ScanPass123!"/></div>
+      <div class="col-md-2"><button class="btn btn-primary">Login</button></div>
+    </form>
+  </div>
+  <div id="scan" style="display:none" class="card p-3">
+    <div class="row g-2">
+      <div class="col-md-6"><input id="ticket" class="form-control" placeholder="Ticket ID"/></div>
+      <div class="col-md-2"><button id="scanbtn" class="btn btn-success w-100">Scan</button></div>
+    </div>
+    <hr/>
+    <pre id="result"></pre>
+  </div>
+</div>
+<script>
+const apiBase='/api';
+document.getElementById('login').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const email=document.getElementById('email').value; const password=document.getElementById('password').value;
+  const res = await fetch(apiBase+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+  const j = await res.json();
+  if(j.status==='ok'){ localStorage.setItem('token', j.token); document.getElementById('scan').style.display='block'; }
+  else alert('login failed');
+});
+document.getElementById('scanbtn').addEventListener('click', async ()=>{
+  const token = localStorage.getItem('token'); const id=document.getElementById('ticket').value;
+  const res = await fetch(apiBase+'/scan',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({ticket_id:id})});
+  const j = await res.json(); document.getElementById('result').textContent = JSON.stringify(j, null, 2);
+});
+</script>
+</body>
+</html>
