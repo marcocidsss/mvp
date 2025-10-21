@@ -1,0 +1,19 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend estático para la plataforma de venta de entradas",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server src --port=3000 --open=index.html",
+    "serve": "serve src",
+    "build": "echo 'No build step needed for static frontend'",
+    "test": "echo 'No tests defined'"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.0"
+  }
+}
